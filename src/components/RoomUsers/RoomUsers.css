@@ -1,0 +1,7 @@
+.room-user-list {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+    height: 100%;
+    border-left: 1px solid black;
+}

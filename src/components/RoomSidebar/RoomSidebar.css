@@ -1,0 +1,31 @@
+.room-sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 20%;
+    height: 100%;
+    border-right: 1px solid black;
+}
+
+.room-sidebar-all-rooms, .room-sidebar-joined-rooms {
+    height: 40%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow-y: scroll;
+    padding: 0px 5px 0px;
+}
+
+.room-sidebar-room {
+    cursor: pointer;
+}
+
+hr {
+    width: 100%;
+}
+
+.room-sidebar-create {
+    display: flex;
+    flex-direction: column;
+}

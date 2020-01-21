@@ -1,0 +1,194 @@
+import React, { Component } from 'react'
+import {connect} from 'react-redux'
+import {withRouter, Link} from 'react-router-dom'
+import Loading from '../Loading/Loading'
+import {updateUserData, joinRoom} from '../../redux/reducers/userReducer'
+import {createRoom, getAllRooms} from '../../redux/reducers/roomReducer'
+import {ioConnect} from '../../redux/reducers/ioReducer'
+import './Home.css'
+
+class Home extends Component {
+    constructor() {
+        super()
+
+        this.state = {
+            id: null,
+            username: '',
+            profileImgUrl: '',
+            primaryColor: '',
+            rooms: [],
+            roomName: '',
+            roomTopic: '',
+            messages: {},
+            currentRoom: '',
+            message:'',
+            users: []
+        }
+    }
+
+    componentDidMount() {
+        if(!this.props.id) {
+            this.props.history.push('/login')
+        } else {
+            this.props.updateUserData(this.props.id)
+            this.props.getAllRooms()
+            document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
+            
+            this.props.io.on('join-room-response', res => {
+                console.log('server-response:', res)
+                // messages[res.room] = [{from: res.room, message: res.message}]
+                // rooms.push(res.room)
+                if(this.state.messages[res.room.name]) {
+                    this.setState({
+                        messages: {...this.state.messages, [res.room.name]: [...this.state.messages[res.room.name], {from: 'room', message: res.message}]},
+                        currentRoom: res.room.name
+                    })
+                } else {
+                    this.setState({
+                        messages: {...this.state.messages, [res.room.name]: [{from: 'room', message: res.message}]},
+                        currentRoom: res.room.name
+                    })
+                }
+                if(!this.state.rooms[res.room.name]) {
+                    this.setState({
+                        rooms: {...this.state.rooms, [res.room.name]: res.users}
+                    })
+                }
+            })
+
+            this.props.io.on('send-message-response', res => {
+                this.setState({
+                    messages: {...this.state.messages, [res.room]: [...this.state.messages[res.room], {from: res.user, message: res.message}]}
+                })
+            })
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if(prevProps.rooms != this.props.rooms) {
+            const newRoom = this.props.rooms.filter(e => prevProps.rooms.indexOf(e) == -1)
+            this.props.io.emit('join-room', newRoom[0], {
+                id: this.props.id,
+                username: this.props.username
+            })
+        }
+    }
+
+    handleChange = e => {
+        this.setState({
+            [e.target.name]: e.target.value
+        })
+    }
+
+    submit = () => {
+        const room = {
+            name: this.state.roomName,
+            topic: this.state.roomTopic
+        }
+
+        this.props.createRoom(room)
+    }
+
+    setRoom = room => {
+        console.log('set room:', room)
+        this.setState({
+            currentRoom: room
+        })
+    }
+
+    joinRoom = room => {
+        this.props.io.emit('join-room', room, {
+            id: this.props.id,
+            username: this.props.username
+        })
+        this.setState({
+            currentRoom: room.name
+        })
+        this.props.joinRoom(room)
+    }
+
+    sendMessage = () => {
+        this.props.io.emit('send-message', {
+            user: this.props.username,
+            room: this.state.currentRoom,
+            message: this.state.message
+        })
+        this.setState({
+            message: ''
+        })
+    }
+
+    keyPress = e => {
+        if(e.charCode == 13) {
+            this.sendMessage()
+        }
+    }
+
+    render() {
+        return (
+            <div className='home'>
+                {this.props.loading ? <Loading /> : null}
+                <div className='home-main-container'>
+                    <div className='home-room-list'>
+                        <div className='home-all-rooms'>
+                            <h2 className='section-title'>All Rooms:</h2>
+                            {this.props.allRooms.map(v => (
+                                <span key={`all_rooms_${v.id}`} onClick={() => this.joinRoom(v)}>{v.name}</span>
+                            ))}
+                            <hr />
+                            <h2 className='section-title'>Joined Rooms:</h2>
+                            {this.props.rooms.map((v, i) => {
+                                console.log(v)
+                                return <span key={i} onClick={() => this.setRoom(v.name)}>{v.name}</span>
+                            })}
+                        </div>
+                        <div className='home-add-room-form'>
+                            <input name='roomName' onChange={this.handleChange} placeholder='Room Name' value={this.state.roomName} />
+                            <textarea name='roomTopic' rows='5' onChange={this.handleChange} placeholder='Room Topic' value={this.state.roomTopic} />
+                            <button onClick={this.submit}>Create New Room</button>
+                        </div>
+                    </div>
+                    <div className='home-dashboard'>
+                        <img src={this.props.profileImgUrl} alt='Avatar' className='home-profile-image'></img>
+                        <div>
+                            <h1>{this.props.username}</h1>
+                            <Link to='/settings/edit'><button>Edit Settings</button></Link>
+                            <h2>{this.state.currentRoom}</h2>
+                            <div className='chat-display'>
+                                {console.log(this.state.messages)}
+                                {this.state.messages[this.state.currentRoom] ? (this.state.messages[this.state.currentRoom].map((v, i) => (
+                                    <div key={i}>
+                                        <div>{`${v.from != 'room' ? `${v.from}: ` : ''}
+                                        ${v.message}`}</div>
+                                    </div>
+                                ))) : null}
+                                <div>
+                                    <input name='message' onChange={this.handleChange} onKeyPress={this.keyPress} value={this.state.message} />
+                                    <button onClick={this.sendMessage}>Say Something</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                        </div>
+                    </div>
+                    <div className='user-list'>
+                        {}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
+
+const checkout = state => ({
+    id: state.ur.id,
+    username: state.ur.username,
+    profileImgUrl: state.ur.profileImgUrl,
+    primaryColor: state.ur.primaryColor,
+    io: state.ur.io,
+    rooms: state.ur.rooms,
+    loading: state.ur.loading,
+    allRooms: state.rr.rooms
+})
+
+export default connect(checkout, {updateUserData, createRoom, getAllRooms, joinRoom})(withRouter(Home))

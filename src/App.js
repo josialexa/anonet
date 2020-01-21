@@ -1,31 +1,33 @@
-import React from 'react';
-// import Register from './components/Register/Register'
-// import Login from './components/Login/Login'
+import React, {Component} from 'react';
 import {HashRouter as Router} from 'react-router-dom'
+// import io from 'socket.io-client'
+// import {connect} from 'react-redux'
+// import {setIo} from './redux/reducers/userReducer'
 import routes from './routes'
 import './App.css';
 
-function App() {
-  const processFile = (e) => {
-    const files = e.target.files
-    const file = files[0]
-    if(file == null) {
-      alert('no file selected')
-    } else {
-      console.log(file)
-    }
-  }
+export default class App extends Component {
+//   constructor() {
+//     super()
 
-  return (
-    <div className="App">
-      {/* <input type='file' onChange={processFile} /> */}
-      {/* <Register /> */}
-      {/* <Login /> */}
-      <Router>
-        {routes}
-      </Router>
-    </div>
-  );
+//     this.state = {
+//       io: io('http://172.31.99.73:4000')
+//     }
+//   }
+
+  // componentDidMount() {
+  //   this.props.setIo(this.state.io)
+  // }
+
+  render() {
+    return (
+      <div className="App">
+        <Router>
+          {routes}
+        </Router>
+      </div>
+    )
+  }
 }
 
-export default App;
+// export default connect(undefined, {setIo})(App)

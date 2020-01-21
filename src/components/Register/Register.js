@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import {connect} from 'react-redux'
 import axios from 'axios'
-import {updateUserData} from '../../redux/userReducer'
+import {setUserId} from '../../redux/reducers/userReducer'
 
 class Register extends Component {
     constructor() {
@@ -29,7 +29,9 @@ class Register extends Component {
         const {username, password} = this.state
         axios.post('/auth/register', {username, password})
             .then(res => {
-                this.props.updateUserData(res.data)
+                console.log(res.data.id)
+                this.props.setUserId(res.data.id)
+
                 console.log('registered:', res.data)
             })
             .catch(err => {
@@ -58,4 +60,4 @@ class Register extends Component {
     }
 }
 
-export default connect(undefined, {updateUserData})(Register)
+export default connect(undefined, {setUserId})(Register)

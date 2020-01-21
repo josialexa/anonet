@@ -7,12 +7,12 @@ CREATE TABLE users (
   profile_img_url TEXT
 );
 
-CREATE TABLE user_settings (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),
-  primary_color VARCHAR(7),
-  profile_img_url TEXT
-);
+-- CREATE TABLE user_settings (
+--   id SERIAL PRIMARY KEY,
+--   user_id INTEGER REFERENCES users(id),
+--   primary_color VARCHAR(7),
+--   profile_img_url TEXT
+-- );
 
 CREATE TABLE rooms (
   id SERIAL PRIMARY KEY,

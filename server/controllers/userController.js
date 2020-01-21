@@ -2,17 +2,28 @@ module.exports = {
     read: (req, res) => {
         const db = req.app.get('db')
 
-        db.user.get(req.params.id || req.session.user.id)
-        //what do i want to use this for?
-            // .then(user => {
-            //     req.session.user.profileImgUrl = user[0].profile_img_url
-            //     req.session.user.primaryColor = user[0].primary_color
-            // })
+        db.user.get(req.params.id)
+            .then(user => {
+                const {id, username, user_since, primary_color, profile_img_url} = user[0]
+                res.status(200).json({
+                    id,
+                    username,
+                    userSince: user_since,
+                    primaryColor: primary_color,
+                    profileImgUrl: profile_img_url
+                })
+            })
+            .catch(err => {
+                console.log('Get user error:', err)
+                res.status(500).json({message: 'Could not retrieve user information'})
+            })
     },
     update: (req, res) => {
         const db = req.app.get('db')
         const {profileImgUrl, primaryColor} = req.body
-        const {id} = req.params
+        const id = req.session.user.id
+
+        console.log(id, primaryColor, profileImgUrl)
 
         db.user.update(id, primaryColor, profileImgUrl)
             .then(updatedUser => {

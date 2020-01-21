@@ -36,7 +36,7 @@ module.exports = {
                     signedRequest: data,
                     url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
                 }
-
+                // console.log(returnData)
                 res.status(200).json(returnData)
             }
         })

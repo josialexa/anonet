@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import {connect} from 'react-redux'
-import {withRouter, Redirect} from 'react-router-dom'
-import {updateUserData} from '../../redux/userReducer'
+import {withRouter, Link} from 'react-router-dom'
+import {setUserId} from '../../redux/reducers/userReducer'
 
 class Login extends Component {
     constructor() {
@@ -25,9 +25,9 @@ class Login extends Component {
         const {username, password} = this.state
         axios.post('/auth/login', {username, password})
             .then(res => {
-                this.props.updateUserData(res.data)
+                console.log(res.data.id)
+                this.props.setUserId(res.data.id)
                 this.props.history.push('/')
-                // return (<Redirect to='/' />)
             })
             .catch(err => {
                 console.log('Login error:', err)
@@ -39,16 +39,21 @@ class Login extends Component {
             })
     }
 
+    keypress = e => {
+        if(e.charCode == 13) this.submit()
+    }
+
     render() {
         return (
             <div>
                 <input placeholder='Username' onChange={e => this.handleChange(e, 'username')} value={this.state.username} />
-                <input type='password' placeholder='Password' onChange={e => this.handleChange(e, 'password')} value={this.state.password} />
+                <input type='password' placeholder='Password' onKeyPress={this.keypress} onChange={e => this.handleChange(e, 'password')} value={this.state.password} />
                 <button onClick={this.submit}>Submit</button>
+                <span>Don't have an account?  <Link to='/register'>Register</Link></span>
             </div>
         )
     }
 }
 
-export default connect(undefined, {updateUserData})(withRouter(Login))
+export default connect(undefined, {setUserId})(withRouter(Login))
 // export default connect(undefined, {updateUserData})(Login)

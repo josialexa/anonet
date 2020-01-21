@@ -1,0 +1,27 @@
+.edit-settings {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-settings-name-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-settings-image {
+    height: 400px;
+    width: 300px;
+}
+
+.edit-settings-color {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-settings-color span {
+    cursor: pointer;
+    margin-bottom: 40px;
+}
