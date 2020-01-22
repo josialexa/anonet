@@ -13,9 +13,10 @@ const rc = require('./controllers/roomController')
 
 const app = express()
 const server = http.Server(app)
-const io = socketio(server)
+const io = socketio(server, {pingTimeout: 10000})
 const {SERVER_PORT, SESSION_SECRET, DB_STRING} = process.env
 const roomUsers = {}
+const users = []
 
 massive(DB_STRING).then(db => {
     app.set('db', db)
@@ -42,40 +43,53 @@ app.get('/api/rooms', rc.readAll)
 
 app.get('/api/media/sign-s3', sc.getSigned)
 
+// io.origins('http://172.31.99.73:4000')
 io.on('connect', socket => {
-    console.log('New connection')
+    console.log('New connection', socket.id)
 
     socket.on('join-room', (room, user) => {
-        // console.log(room, user)
-        if(!roomUsers[room.name] || roomUsers[room.name].indexOf(user.username) == -1) {
-            console.log('joining room')
-            socket.join(room.name)
-            if(!roomUsers[room.name]) roomUsers[room.name] = []
-            roomUsers[room.name].push(user)
-            // console.log(roomUsers)
-            console.log(room)
-            io.in(room.name).emit('join-room-response',{
-                room: room,
-                message: `${user.username} has entered the room!`,
-                users: roomUsers[room.name].map(v => v.username)
+        socket.user = user
+        if(!roomUsers[room.name] || roomUsers[room.name].indexOf(user) == -1) {
+            // console.log('joining room', socket.user.username)
+            socket.join(room.name, () => {
+
+                // console.log(Object.keys(socket.rooms))
+                if(!roomUsers[room.name]) roomUsers[room.name] = []
+                roomUsers[room.name].push(user)
+                // console.log(roomUsers)
+                // console.log(room)
+                socket.to(room.name).emit('join-room-response',{
+                    room: room,
+                    message: `${user.username} has entered the room!`,
+                    users: roomUsers[room.name].map(v => v.username)
+                })
             })
         }
     })
 
     socket.on('get-room-users', room => {
-        io.to(room).emit('set-room-users', roomUsers[room])
+        console.log(roomUsers)
+        io.to(room.name).emit('set-room-users', roomUsers[room.name])
     })
 
     socket.on('send-message', msg => {
-        io.to(msg.room).emit('send-message-response', {
+        // console.log('send-message-response:', msg)
+        socket.to(msg.room).emit('send-message-response', {
             room: msg.room,
             user: msg.user,
             message: msg.message
         })
     })
 
-    socket.on('disconnect', () => {
-        console.log('Someone disconnected')
+    socket.on('leave-room', room => {
+        socket.leave(room, () => {
+            roomUsers[room.name].splice(roomUsers[room.name].indexOf(socket.user), 1)
+            io.to(room.name).emit('set-room-users', roomUsers[room.name])
+        })
+    })
+
+    socket.on('disconnect', reason => {
+        console.log('Someone disconnected', socket.id, reason)
     })
 })
 

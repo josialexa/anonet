@@ -3,12 +3,12 @@ const aws = require('aws-sdk')
 const {S3_BUCKET, AWS_REGION} = process.env
 
 aws.config.getCredentials(function(err) {
-    if (err) console.log(err.stack);
-    // credentials not loaded
-    else {
-      console.log("Access key:", aws.config.credentials.accessKeyId);
-      console.log("Secret access key:", aws.config.credentials.secretAccessKey);
-    }
+    // if (err) console.log(err.stack);
+    // // credentials not loaded
+    // else {
+    //   console.log("Access key:", aws.config.credentials.accessKeyId);
+    //   console.log("Secret access key:", aws.config.credentials.secretAccessKey);
+    // }
   });
 
   aws.config.region = AWS_REGION

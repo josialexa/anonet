@@ -1,10 +1,10 @@
 module.exports = {
     create: (req, res) => {
         const db = req.app.get('db')
-        const {name, topic} = req.body
+        const {roomName, roomTopic} = req.body
         const {id} = req.session.user
 
-        db.room.create(name, topic, id)
+        db.room.create(roomName, roomTopic, id)
             .then(result => {
                 res.status(200).json(result)
             })

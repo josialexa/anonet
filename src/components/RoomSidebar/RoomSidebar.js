@@ -9,8 +9,8 @@ class RoomSidebar extends Component {
         super()
 
         this.state = {
-            name: '',
-            topic: ''
+            roomName: '',
+            roomTopic: ''
         }
     }
 
@@ -29,8 +29,14 @@ class RoomSidebar extends Component {
     }
 
     submit = () => {
-        const {name, topic} = this.state
-        this.props.createRoom({name, topic})
+        const {roomName, roomTopic} = this.state
+        console.log(roomName, roomTopic)
+        this.props.createRoom({roomName, roomTopic})
+        this.props.getAllRooms()
+        this.setState({
+            roomName: '',
+            roomTopic: ''
+        })
     }
 
     render() {
@@ -51,7 +57,7 @@ class RoomSidebar extends Component {
                     <h2>Joined Rooms:</h2>
                     {this.props.joinedRooms ?
                         this.props.joinedRooms.map(v => (
-                            <span key={`joined-${v.id}`} className='room-sidebar-room' onClick={() => this.props.setCurrentRoom(v.name)}>{v.name}</span>
+                            <span key={`joined-${v.id}`} className='room-sidebar-room' onClick={() => this.props.setCurrentRoom(v)}>{v.name}</span>
                         ))
                     :
                         null

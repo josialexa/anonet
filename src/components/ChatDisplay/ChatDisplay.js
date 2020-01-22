@@ -13,17 +13,15 @@ class ChatDisplay extends Component {
     }
 
     componentDidMount() {
-        console.log('mounted!')
         this.props.io.on('send-message-response', msg => {
             console.log('message received!')
             this.props.receiveMessage(msg)
         })
-    
+
         this.props.io.on('join-room-response', msg => {
             console.log('room message received!', msg)
             this.props.joinRoomResponse(msg)
         })
-
     }
 
 
@@ -50,12 +48,17 @@ class ChatDisplay extends Component {
         console.log(this.props.messages)
     }
 
+    leave = () => {
+        this.props.leaveRoom(this.props.currentRoom)
+    }
+
     render() {
         return (
             <div className='chat-display'>
+                <div>{this.props.currentRoom ? <button onClick={this.leave}>Leave Room</button> : null}</div>
                 <div className='message-display'>
-                    {this.props.messages && this.props.currentRoom ?
-                        this.props.messages[this.props.currentRoom].map((v, i) => (
+                    {this.props.messages && this.props.currentRoom && this.props.messages[this.props.currentRoom.name] ?
+                        this.props.messages[this.props.currentRoom.name].map((v, i) => (
                             <div key={i} className='room-message'>{`${v.from}: ${v.message}`}</div>
                         ))
                     :

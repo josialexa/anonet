@@ -5,9 +5,10 @@ import './RoomUsers.css'
 
 class RoomUsers extends Component {
     componentDidMount() {
-        this.props.getRoomUsers(this.props.currentRoom)
+        this.props.getRoomUsers(this.props.currentRoom.name)
 
         this.props.io.on('set-room-users', users => {
+            console.log('room-users', users)
             this.props.setRoomUsers(users)
         })
     }
@@ -18,7 +19,7 @@ class RoomUsers extends Component {
                 <h2>Users in Room:</h2>
                 {this.props.roomUsers ? 
                     this.props.roomUsers.map(v => (
-                        <span>{v}</span>
+                        <span>{v.username}</span>
                     ))
                 :
                     null

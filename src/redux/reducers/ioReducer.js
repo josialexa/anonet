@@ -1,10 +1,11 @@
 import io from 'socket.io-client'
+// const io = socketIo('http://172.31.99.73:4000')
 
 const initialState = {
     io: io('http://172.31.99.73:4000'),
     joinedRooms: [],
     roomUsers: [],
-    currentRoom: '',
+    currentRoom: {id: 0, name: 'nothing'},
     messages: {}
 }
 
@@ -36,7 +37,7 @@ export const ioDisconnect = () => {
 }
 
 export const joinRoom = (room, user) => {
-    console.log('room and user', room, user)
+    // console.log('room and user', room, user)
     return {
         type: JOIN_ROOM,
         payload: {
@@ -85,7 +86,7 @@ export const setRoomUsers = users => {
 }
 
 export const sendMessage = msg => {
-    console.log('send:', msg)
+    // console.log('send:', msg)
     return {
         type: SEND_MESSAGE,
         payload: msg
@@ -93,7 +94,7 @@ export const sendMessage = msg => {
 }
 
 export const receiveMessage = msg => {
-    console.log(msg)
+    // console.log(msg)
     return {
         type: RECEIVE_MESSAGE,
         payload: msg
@@ -121,30 +122,35 @@ export default function reducer(state = initialState, action) {
             }
         case JOIN_ROOM:
             state.io.emit('join-room', payload.room, payload.user)
+            console.log('joining room', payload)
             return {
                 ...state,
-                joinedRooms: [...state.joinedRooms, payload.room]
+                joinedRooms: [...state.joinedRooms, payload.room],
+                messages: {...state.messages, [payload.room.name]: [{from: payload.room.name, message: `${payload.user.username} has entered the room!`}]}
             }
         case JOIN_ROOM_RESPONSE:
             const welcomeMessages = !state.messages[payload.room.name] ?
                 [{from: payload.room.name, message: payload.message}]
             :
                 [...state.messages[payload.room.name], {from: payload.room.name, message: payload.message}]
-                console.log({
-                    ...state,
-                    messages: {...state.messages, [payload.room.name]: welcomeMessages}
-                })
+                // console.log('join-room-response', {
+                //     ...state,
+                //     messages: {...state.messages, [payload.room.name]: welcomeMessages}
+                // })
             return {
                 ...state,
                 messages: {...state.messages, [payload.room.name]: welcomeMessages}
             }
         case LEAVE_ROOM:
-            state.io.emit('leave-room', payload.room, payload.user)
+            state.io.emit('leave-room', payload.room)
+            console.log('leave-room', payload)
             return {
                 ...state,
-                joinedRooms: state.joinedRooms.filter(v => v.id != payload.room.id)
+                joinedRooms: state.joinedRooms.filter(v => v.id != payload.room.id),
+                currentRoom: {id: 0, name: 'nothing'}
             }
         case SET_CURRENT_ROOM:
+            state.io.emit('get-room-users', payload)
             return {
                 ...state,
                 currentRoom: payload
@@ -153,23 +159,27 @@ export default function reducer(state = initialState, action) {
             state.io.emit('get-room-users', payload)
             return state
         case SET_ROOM_USERS:
+            console.log('set-users', payload)
             return {
                 ...state,
                 roomUsers: payload
             }
         case SEND_MESSAGE:
             state.io.emit('send-message', payload)
-            return state
-        case RECEIVE_MESSAGE:
-            console.log('receive message:', payload)
-            const roomMessages = !state.messages[payload.room] ?
-                [{from: payload.user, message: payload.message}]
-            :
-                [...state.messages[payload.room], {from: payload.user, message: payload.message}]
-            if(state.messages[payload.room].indexOf({from: payload.user, message: payload.message}) != -1) return state
             return {
                 ...state,
-                messages: {...state.messages, [payload.room]: roomMessages}
+                messages: {...state.messages, [payload.room.name]: [...state.messages[payload.room.name], {from: payload.user, message: payload.message}]}
+            }
+        case RECEIVE_MESSAGE:
+            // console.log('receive message:', payload)
+            const roomMessages = !state.messages[payload.room.name] ?
+                [{from: payload.user, message: payload.message}]
+            :
+                [...state.messages[payload.room.name], {from: payload.user, message: payload.message}]
+            if(state.messages[payload.room.name].indexOf({from: payload.user, message: payload.message}) != -1) return state
+            return {
+                ...state,
+                messages: {...state.messages, [payload.room.name]: roomMessages}
             }
         default: return state
     }
