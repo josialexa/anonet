@@ -15,8 +15,10 @@ const initialState = {
 const UPDATE_USER_DATA = 'UPDATE_USER_DATA'
 const SET_USER_ID = 'SET_USER_ID'
 const UPDATE_SETTINGS = 'UPDATE_SETTINGS'
+const REGISTER_USER = 'REGISTER_USER'
 const LOGIN = 'LOGIN'
 const LOGOUT = 'LOGOUT'
+const DELETE_USER = 'DELETE_USER'
 // const UPDATE_MESSAGE = 'UPDATE_MESSAGE'
 // const UPDATE_FILE = 'UPDATE_FILE'
 // const SET_IO = 'SET_IO'
@@ -44,6 +46,13 @@ export const updateSettings = user => {
     }
 }
 
+export const registerUser = (username, password) => {
+    return {
+        type: REGISTER_USER,
+        payload: axios.post('/auth/register', {username, password})
+    }
+}
+
 export const login = () => {
 
 }
@@ -52,6 +61,13 @@ export const logout = () => {
     return {
         type: LOGOUT,
         payload: axios.get('/auth/logout')
+    }
+}
+
+export const deleteUser = id => {
+    return {
+        type: DELETE_USER,
+        payload: axios.delete(`/api/users/${id}`)
     }
 }
 
@@ -106,6 +122,22 @@ export default function reducer(state = initialState, action) {
                 profileImgUrl: payload.data.profile_img_url,
                 loading: false
             }
+        case `${UPDATE_SETTINGS}_PENDING`:
+            return {
+                ...state,
+                loading: true
+            }
+        case `${REGISTER_USER}_PENDING`:
+            return {
+                ...state,
+                loading: true
+            }
+        case `${REGISTER_USER}_FULFILLED`:
+            return {
+                ...state,
+                id: payload.data.id,
+                loading: false
+            }
         case `${LOGIN}_FULFILLED`:
             return state
         case `${LOGOUT}_PENDING`:
@@ -116,6 +148,20 @@ export default function reducer(state = initialState, action) {
         case `${LOGOUT}_FULFILLED`:
             return {
                 ...state,
+                loading: false
+            }
+        case `${DELETE_USER}_PENDING`:
+            return {
+                ...state,
+                loading: true
+            }
+        case `${DELETE_USER}_FULFILLED`:
+            return {
+                file: null,
+                id: null,
+                username: '',
+                primaryColor: '',
+                profileImgUrl: '',
                 loading: false
             }
         // case SET_IO:

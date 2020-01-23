@@ -55,7 +55,7 @@ module.exports = {
                             bcrypt.hash(password, salt)
                                 .then(hash => {
                                     //store username and salt in db
-                                    db.user.create(username, hash, '#4eeefc', '/images/defaultUser.png')
+                                    db.user.create(username, hash, '#4eeefc', 'https://anonet.s3.us-east-2.amazonaws.com/defaultUser.png')
                                         .then(newUser => {
                                             //store new user to session and send it back
                                             req.session.user = {

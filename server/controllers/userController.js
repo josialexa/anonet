@@ -5,6 +5,7 @@ module.exports = {
         db.user.get(req.params.id)
             .then(user => {
                 const {id, username, user_since, primary_color, profile_img_url} = user[0]
+                console.log(primary_color)
                 res.status(200).json({
                     id,
                     username,

@@ -9,6 +9,8 @@ const ac = require('./controllers/authController')
 const sc = require('./controllers/s3Controller')
 const uc = require('./controllers/userController')
 const rc = require('./controllers/roomController')
+const am = require('./middleware/authMiddleware')
+const im = require('./middleware/ioMiddleware')
 // const bcrypt = require('bcrypt')
 
 const app = express()
@@ -20,6 +22,9 @@ const users = []
 
 massive(DB_STRING).then(db => {
     app.set('db', db)
+    // io.use((socket, next) => {
+    //     return next(db)
+    // })
     console.log('DB connected!')
 })
 
@@ -35,24 +40,30 @@ app.post('/auth/login', ac.login)
 app.post('/auth/register', ac.register)
 app.get('/auth/logout', ac.logout)
 
+app.use(am.usersOnly)
 app.get('/api/users/:id', uc.read)
-app.put('/api/users/', uc.update)
+app.put('/api/users/', am.selfOnly, uc.update)
+app.delete('/api/users/:id', am.selfOnly, uc.delete)
 
 app.post('/api/rooms', rc.create)
-app.get('/api/rooms', rc.readAll)
+app.get('/api/rooms', rc.read)
+app.put('/api/rooms/:id', rc.update)
+app.delete('/api/rooms/:id', rc.delete)
 
 app.get('/api/media/sign-s3', sc.getSigned)
 
 // io.origins('http://172.31.99.73:4000')
+io.use(im.usersOnly)
 io.on('connect', socket => {
     console.log('New connection', socket.id)
-
+    socket.use(im.ownersOnly)
+    
     socket.on('join-room', (room, user) => {
         socket.user = user
         if(!roomUsers[room.name] || roomUsers[room.name].indexOf(user) == -1) {
             // console.log('joining room', socket.user.username)
             socket.join(room.name, () => {
-
+                
                 // console.log(Object.keys(socket.rooms))
                 if(!roomUsers[room.name]) roomUsers[room.name] = []
                 roomUsers[room.name].push(user)

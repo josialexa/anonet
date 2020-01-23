@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
+import {withRouter} from 'react-router-dom'
 import {connect} from 'react-redux'
-import axios from 'axios'
-import {setUserId} from '../../redux/reducers/userReducer'
+import {setUserId, registerUser} from '../../redux/reducers/userReducer'
 
 class Register extends Component {
     constructor() {
@@ -14,8 +14,10 @@ class Register extends Component {
         }
     }
 
-    componentDidMount() {
-
+    componentDidUpdate(prevProps) {
+        if(!this.props.loading && this.props.id) {
+            this.props.history.push('/')
+        }
     }
 
     handleChange = (e, target) => {
@@ -27,16 +29,18 @@ class Register extends Component {
 
     submit = () => {
         const {username, password} = this.state
-        axios.post('/auth/register', {username, password})
-            .then(res => {
-                console.log(res.data.id)
-                this.props.setUserId(res.data.id)
+        // axios.post('/auth/register', {username, password})
+        //     .then(res => {
+        //         console.log(res.data.id)
+        //         this.props.setUserId(res.data.id)
 
-                console.log('registered:', res.data)
-            })
-            .catch(err => {
-                console.log('Error in registration:', err)
-            })
+        //         console.log('registered:', res.data)
+        //     })
+        //     .catch(err => {
+        //         console.log('Error in registration:', err)
+        //     })
+
+        this.props.registerUser(username, password)
 
         this.setState({
             username: '',
@@ -60,4 +64,9 @@ class Register extends Component {
     }
 }
 
-export default connect(undefined, {setUserId})(Register)
+const checkout = state => ({
+    id: state.ur.id,
+    loading: state.ur.loading
+})
+
+export default connect(checkout, {setUserId, registerUser})(Register)

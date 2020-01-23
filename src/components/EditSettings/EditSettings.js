@@ -4,7 +4,8 @@ import {withRouter} from 'react-router-dom'
 import axios from 'axios'
 import {SketchPicker} from 'react-color'
 import reactCSS from 'reactcss'
-import {updateSettings} from '../../redux/reducers/userReducer'
+import Loading from '../Loading/Loading'
+import {updateSettings, deleteUser} from '../../redux/reducers/userReducer'
 import './EditSettings.css'
 
 class EditSettings extends Component {
@@ -13,7 +14,7 @@ class EditSettings extends Component {
 
         this.state = {
             uploadedUrl: this.props.profileImgUrl,
-            primaryColor: this.props.primaryColor,
+            colorSelection: this.props.primaryColor,
             displayPicker: false
         }
     }
@@ -21,6 +22,16 @@ class EditSettings extends Component {
     componentDidMount() {
         if(!this.props.id) {
             this.props.history.push('/login')
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if(!this.props.id) {
+            this.props.history.push('/login')
+        } else {
+            if(this.props.primaryColor != prevProps.primaryColor) {
+                document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
+            }
         }
     }
 
@@ -65,25 +76,45 @@ class EditSettings extends Component {
 
     handleColorChange = color => {
         this.setState({
-            primaryColor: color.hex
+            colorSelection: color.hex
         })
     }
 
     submit = () => {
         const settings = {
             profileImgUrl: this.state.uploadedUrl,
-            primaryColor: this.state.primaryColor
+            primaryColor: this.state.colorSelection
         }
 
         this.props.updateSettings(settings)
-        document.documentElement.style.setProperty('--primary-color', this.state.primaryColor)
+        document.documentElement.style.setProperty('--primary-color', this.state.colorSelection)
+        this.props.history.push('/')
+    }
+
+    cancel = () => {
+        this.setState({
+            colorSelection: this.props.primaryColor,
+            uploadedUrl: this.props.profileImgUrl
+        })
+        this.props.history.push('/')
+    }
+
+    delete = () => {
+        const conf = window.confirm("Are you sure you want to delete your account?")
+
+        if(conf) {
+            console.log('delete account')
+            this.props.deleteUser(this.props.id)
+        } else {
+            console.log('don\'t delete account')
+        }
     }
 
     render() {
         const styles = reactCSS({
             'default': {
                 color: {
-                    color: this.state.primaryColor
+                    color: this.state.colorSelection
                 },
                 popover: {
                     position: 'absolute',
@@ -101,10 +132,11 @@ class EditSettings extends Component {
 
         return (
             <div className='edit-settings'>
+                {this.props.loading ? <Loading /> : null}
                 <div className='edit-settings-name-image'>
                     <h1>{this.props.username}</h1>
                     <img className='edit-settings-image' src={this.state.uploadedUrl} alt='Avatar' />
-                    <label htmlFor='image_upload'>Upload a new Profile Image</label>
+                    <label htmlFor='image_upload' className='file-upload'>Upload a new Profile Image</label>
                     <input type='file' onChange={this.fileOnChange} accept='image/*' name='image_upload' id='image_upload' />
                     <input type='hidden' value={this.state.uploadedUrl} />
                 </div>
@@ -113,11 +145,17 @@ class EditSettings extends Component {
                     {this.state.displayPicker ? (
                         <div style={ styles.popover }>
                             <div style={ styles.cover } onClick={ this.handleColorClose }/>
-                            <SketchPicker color={ this.state.primaryColor } onChange={ this.handleColorChange } />
+                            <SketchPicker color={ this.state.colorSelection } onChange={ this.handleColorChange } />
                         </div>
                     ) : null}
-                    <span style={styles.color} onClick={this.handleColorClick}>{this.state.primaryColor}</span>
-                    <button onClick={this.submit} >Save Changes</button>
+                    <span style={styles.color} onClick={this.handleColorClick}>{this.state.colorSelection}</span>
+                    <button className='save-changes-button' onClick={this.submit} >Save Changes</button>
+                    <div>
+                        <button className='cancel-changes-button' onClick={this.cancel}>Cancel</button>
+                    </div>
+                    <div>
+                        <button className='delete-account-button' onClick={this.delete}>Delete Account</button>
+                    </div>
                 </div>
             </div>
         )
@@ -128,7 +166,8 @@ const checkout = state => ({
     id: state.ur.id,
     username: state.ur.username,
     primaryColor: state.ur.primaryColor,
-    profileImgUrl: state.ur.profileImgUrl
+    profileImgUrl: state.ur.profileImgUrl,
+    loading: state.ur.loading
 })
 
-export default connect(checkout, {updateSettings})(withRouter(EditSettings))
+export default connect(checkout, {updateSettings, deleteUser})(withRouter(EditSettings))

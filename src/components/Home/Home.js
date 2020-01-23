@@ -25,6 +25,13 @@ class Home extends Component {
             this.props.updateUserData(this.props.id)
             // this.props.getAllRooms()
             // this.props.ioConnect('http://172.31.99.73:4000')
+            console.log('primary color', this.props.primaryColor)
+            
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if(prevProps.primaryColor != this.props.primaryColor) {
             document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
         }
     }

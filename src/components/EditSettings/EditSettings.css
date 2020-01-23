@@ -25,3 +25,45 @@
     cursor: pointer;
     margin-bottom: 40px;
 }
+
+.save-changes-button {
+    font-weight: bold;
+    background-color: #66ff66;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    width: 110px;
+}
+
+.cancel-changes-button {
+    font-weight: bold;
+    background-color: #ffff66;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    width: 110px;
+}
+
+.delete-account-button {
+    font-weight: bold;
+    background-color: #ff6666;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    width: 110px;
+}
+
+.file-upload {
+    background-color: #6666ff;
+    font-weight: bold;
+    padding: 10px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    width: 300px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+#image_upload {
+    visibility: hidden;
+}
