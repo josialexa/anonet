@@ -1,5 +1,9 @@
 :root {
   --primary-color: #9999ee;
+  --light: 80;
+  --threshold: 60;
+  --switch: calc((var(--light) - var(--threshold)) * -100%);
+  --light-dark-text: hsl(0, 0%, var(--switch))
 }
 
 .App {

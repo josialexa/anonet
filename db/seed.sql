@@ -22,3 +22,18 @@ CREATE TABLE rooms (
   created_on TIMESTAMP,
   last_used_on TIMESTAMP
 );
+
+CREATE TABLE moderator (
+id SERIAL PRIMARY KEY,
+user_id INTEGER REFERENCES users(id),
+room_id INTEGER REFERENCES rooms(id)
+);
+
+CREATE TABLE ban (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  room_id INTEGER REFERENCES rooms(id),
+  banned_until TIMESTAMP,
+  ban_reason TEXT,
+  banned_by INTEGER REFERENCES users(id)
+);

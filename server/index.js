@@ -9,6 +9,8 @@ const ac = require('./controllers/authController')
 const sc = require('./controllers/s3Controller')
 const uc = require('./controllers/userController')
 const rc = require('./controllers/roomController')
+const mc = require('./controllers/modController')
+const bc = require('./controllers/banController')
 const am = require('./middleware/authMiddleware')
 const im = require('./middleware/ioMiddleware')
 // const bcrypt = require('bcrypt')
@@ -27,6 +29,8 @@ massive(DB_STRING).then(db => {
     // })
     console.log('DB connected!')
 })
+
+app.set('io', io)
 
 // app.use(express.static(__dirname + '/../build'))
 app.use(express.json())
@@ -50,17 +54,32 @@ app.get('/api/rooms', rc.read)
 app.put('/api/rooms/:id', rc.update)
 app.delete('/api/rooms/:id', rc.delete)
 
+app.post('/api/moderators', am.ownersOnly, mc.create)
+app.get('/api/moderators', am.ownersOnly, mc.read)
+app.delete('/api/moderators/:id', am.ownersOnly, mc.delete)
+
+app.post('/api/bans', am.modsOnly, bc.create)
+app.get('/api/bans', am.modsOnly, bc.read)
+app.put('/api/bans/:id', am.modsOnly, bc.update)
+app.delete('/api/bans/:id', am.modsOnly, bc.delete)
+
 app.get('/api/media/sign-s3', sc.getSigned)
 
 // io.origins('http://172.31.99.73:4000')
-io.use(im.usersOnly)
+// io.use(im.usersOnly)
 io.on('connect', socket => {
     console.log('New connection', socket.id)
-    socket.use(im.ownersOnly)
     
-    socket.on('join-room', (room, user) => {
+    // const db = app.get('db')
+    // socket.use(im.ownersOnly)
+    
+    socket.on('join-room', async (room, user) => {
         socket.user = user
-        if(!roomUsers[room.name] || roomUsers[room.name].indexOf(user) == -1) {
+        let banList = await app.get('db').ban.readRoom(room.id)
+        // console.log(banList)
+        /*&& banList.findIndex(v => v.user_id == user.id) == -1*/
+
+        if((!roomUsers[room.name] || roomUsers[room.name].indexOf(user) == -1)) {
             // console.log('joining room', socket.user.username)
             socket.join(room.name, () => {
                 
@@ -79,13 +98,13 @@ io.on('connect', socket => {
     })
 
     socket.on('get-room-users', room => {
-        console.log(roomUsers)
+        // console.log(roomUsers)
         io.to(room.name).emit('set-room-users', roomUsers[room.name])
     })
 
     socket.on('send-message', msg => {
-        // console.log('send-message-response:', msg)
-        socket.to(msg.room).emit('send-message-response', {
+        console.log('send-message-response:', msg)
+        socket.to(msg.room.name).emit('send-message-response', {
             room: msg.room,
             user: msg.user,
             message: msg.message

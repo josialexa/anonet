@@ -88,6 +88,7 @@ header {
     font-weight: bold;
     border: none;
     text-decoration: none;
+    color: var(--light-dark-text);
 }
 
 .home-profile-image {

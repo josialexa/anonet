@@ -126,13 +126,13 @@ export default function reducer(state = initialState, action) {
             return {
                 ...state,
                 joinedRooms: [...state.joinedRooms, payload.room],
-                messages: {...state.messages, [payload.room.name]: [{from: payload.room.name, message: `${payload.user.username} has entered the room!`}]}
+                messages: {...state.messages, [payload.room.name]: [{from: payload.user, message: `${payload.user.username} has entered the room!`}]}
             }
         case JOIN_ROOM_RESPONSE:
             const welcomeMessages = !state.messages[payload.room.name] ?
                 [{from: payload.room.name, message: payload.message}]
             :
-                [...state.messages[payload.room.name], {from: payload.room.name, message: payload.message}]
+                [...state.messages[payload.room.name], {from: {id: 0, username: payload.room.name, primaryColor: '#000000', profileImgUrl: 'https://anonet.s3.us-east-2.amazonaws.com/defaultUser.png'}, message: payload.message}]
                 // console.log('join-room-response', {
                 //     ...state,
                 //     messages: {...state.messages, [payload.room.name]: welcomeMessages}

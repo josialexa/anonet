@@ -23,6 +23,7 @@ class EditSettings extends Component {
         if(!this.props.id) {
             this.props.history.push('/login')
         }
+        document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
     }
 
     componentDidUpdate(prevProps) {
@@ -82,10 +83,12 @@ class EditSettings extends Component {
 
     submit = () => {
         const settings = {
+            username: this.props.username,
             profileImgUrl: this.state.uploadedUrl,
             primaryColor: this.state.colorSelection
         }
 
+        console.log(settings)
         this.props.updateSettings(settings)
         document.documentElement.style.setProperty('--primary-color', this.state.colorSelection)
         this.props.history.push('/')

@@ -1,0 +1,2 @@
+DELETE FROM ban
+WHERE id = $1;

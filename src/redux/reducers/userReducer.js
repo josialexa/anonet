@@ -122,11 +122,6 @@ export default function reducer(state = initialState, action) {
                 profileImgUrl: payload.data.profile_img_url,
                 loading: false
             }
-        case `${UPDATE_SETTINGS}_PENDING`:
-            return {
-                ...state,
-                loading: true
-            }
         case `${REGISTER_USER}_PENDING`:
             return {
                 ...state,
