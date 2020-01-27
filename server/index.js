@@ -105,6 +105,7 @@ io.on('connect', socket => {
     socket.on('send-message', msg => {
         console.log('send-message-response:', msg)
         socket.to(msg.room.name).emit('send-message-response', {
+            localTime: msg.localTime,
             room: msg.room,
             user: msg.user,
             message: msg.message
@@ -120,6 +121,9 @@ io.on('connect', socket => {
 
     socket.on('disconnect', reason => {
         console.log('Someone disconnected', socket.id, reason)
+        for(room in roomUsers) {
+            roomUsers[room].filter(v => v.id != socket.user.id)
+        }
     })
 })
 

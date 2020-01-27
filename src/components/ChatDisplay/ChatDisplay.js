@@ -63,6 +63,7 @@ class ChatDisplay extends Component {
             profileImgUrl: this.props.profileImgUrl
         }
         const msg = {
+            localTime: new Date().getTime(),
             room: this.props.currentRoom,
             user,
             message: this.state.message

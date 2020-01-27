@@ -172,12 +172,13 @@ export default function reducer(state = initialState, action) {
                 messages: {...state.messages, [payload.room.name]: [...state.messages[payload.room.name], {from: payload.user, message: payload.message}]}
             }
         case RECEIVE_MESSAGE:
-            // console.log('receive message:', payload)
+            console.log('receive message:', payload)
             const roomMessages = !state.messages[payload.room.name] ?
-                [{from: payload.user, message: payload.message}]
+                [{from: payload.user, message: payload.message, localTime: payload.localTime}]
             :
-                [...state.messages[payload.room.name], {from: payload.user, message: payload.message}]
+                [...state.messages[payload.room.name], {from: payload.user, message: payload.message, localTime: payload.localTime}]
             if(state.messages[payload.room.name].indexOf({from: payload.user, message: payload.message}) != -1) return state
+            if(state.messages[payload.room.name].findIndex(v => v.from == payload.user && v.localTime == payload.localTime) != -1) return state
             return {
                 ...state,
                 messages: {...state.messages, [payload.room.name]: roomMessages}
