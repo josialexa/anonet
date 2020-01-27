@@ -1,8 +1,9 @@
 import io from 'socket.io-client'
+require('dotenv').config()
 // const io = socketIo('http://172.31.99.73:4000')
 
 const initialState = {
-    io: io('http://172.31.99.73:4000'),
+    io: io(process.env.REACT_APP_IO),
     joinedRooms: [],
     roomUsers: [],
     currentRoom: {id: 0, name: 'nothing'},
