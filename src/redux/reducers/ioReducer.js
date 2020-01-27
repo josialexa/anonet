@@ -3,7 +3,7 @@ require('dotenv').config()
 // const io = socketIo('http://172.31.99.73:4000')
 
 const initialState = {
-    io: io(process.env.REACT_APP_IO),
+    io: io(),
     joinedRooms: [],
     roomUsers: [],
     currentRoom: {id: 0, name: 'nothing'},
