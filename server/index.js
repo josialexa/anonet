@@ -73,7 +73,7 @@ io.on('connect', socket => {
     // const db = app.get('db')
     // socket.use(im.ownersOnly)
     
-    socket.on('join-room', async (room, user) => {
+    socket.on('join-room', async (localTime, room, user) => {
         socket.user = user
         let banList = await app.get('db').ban.readRoom(room.id)
         // console.log(banList)
@@ -89,6 +89,7 @@ io.on('connect', socket => {
                 // console.log(roomUsers)
                 // console.log(room)
                 socket.to(room.name).emit('join-room-response',{
+                    localTime: localTime,
                     room: room,
                     message: `${user.username} has entered the room!`,
                     users: roomUsers[room.name].map(v => v.username)
@@ -123,6 +124,7 @@ io.on('connect', socket => {
         console.log('Someone disconnected', socket.id, reason)
         for(room in roomUsers) {
             roomUsers[room].filter(v => v.id != socket.user.id)
+            io.to(room.name).emit('set-room-users', roomUsers[room.name])
         }
     })
 })

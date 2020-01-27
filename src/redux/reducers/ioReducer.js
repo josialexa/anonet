@@ -42,6 +42,7 @@ export const joinRoom = (room, user) => {
     return {
         type: JOIN_ROOM,
         payload: {
+            localTime: new Date().getTime(),
             room,
             user
         }
@@ -122,22 +123,25 @@ export default function reducer(state = initialState, action) {
                 messages: {}
             }
         case JOIN_ROOM:
-            state.io.emit('join-room', payload.room, payload.user)
+            state.io.emit('join-room', payload.localTime, payload.room, payload.user)
             console.log('joining room', payload)
             return {
                 ...state,
                 joinedRooms: [...state.joinedRooms, payload.room],
-                messages: {...state.messages, [payload.room.name]: [{from: payload.user, message: `${payload.user.username} has entered the room!`}]}
+                messages: {...state.messages, [payload.room.name]: [{from: payload.room.name, message: `${payload.user.username} has entered the room!`, localTime: payload.localTime}]}
             }
         case JOIN_ROOM_RESPONSE:
             const welcomeMessages = !state.messages[payload.room.name] ?
-                [{from: payload.room.name, message: payload.message}]
+                [{from: {id: 0, username: payload.room.name, primaryColor: '#000000', profileImgUrl: 'https://anonet.s3.us-east-2.amazonaws.com/defaultUser.png'}, message: payload.message, localTime: payload.localTime}]
             :
-                [...state.messages[payload.room.name], {from: {id: 0, username: payload.room.name, primaryColor: '#000000', profileImgUrl: 'https://anonet.s3.us-east-2.amazonaws.com/defaultUser.png'}, message: payload.message}]
+                [...state.messages[payload.room.name], {from: {id: 0, username: payload.room.name, primaryColor: '#000000', profileImgUrl: 'https://anonet.s3.us-east-2.amazonaws.com/defaultUser.png'}, message: payload.message, localTime: payload.localTime}]
                 // console.log('join-room-response', {
                 //     ...state,
                 //     messages: {...state.messages, [payload.room.name]: welcomeMessages}
                 // })
+                console.log(state.messages[payload.room.name].findIndex(v => v.message == payload.message && v.localTime == payload.localTime))
+                console.log(state.messages[payload.room.name], payload.localTime)
+                if(state.messages[payload.room.name].findIndex(v => v.message == payload.message && v.localTime == payload.localTime) != -1) return state
             return {
                 ...state,
                 messages: {...state.messages, [payload.room.name]: welcomeMessages}
