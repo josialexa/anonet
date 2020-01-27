@@ -9,6 +9,20 @@ import {updateUserData, logout} from '../../redux/reducers/userReducer'
 import {ioDisconnect} from '../../redux/reducers/ioReducer'
 import './Home.css'
 
+const detLum = color => {
+    if(color) {
+        const colors = []
+        colors.push(color.substr(1, 2))
+        colors.push(color.substr(3, 2))
+        colors.push(color.substr(5, 2))
+    
+        console.log(colors)
+    
+        const lum = Math.floor(colors.reduce((t, v) => t += Math.floor((parseInt(v, 16) / 255) * 100), 0) / 3)
+        return lum
+    }
+}
+
 class Home extends Component {
     constructor() {
         super()
@@ -22,6 +36,7 @@ class Home extends Component {
         if(!this.props.id) {
             this.props.history.push('/login')
         } else {
+            console.log('mounted home')
             this.props.updateUserData(this.props.id)
             // this.props.getAllRooms()
             // this.props.ioConnect('http://172.31.99.73:4000')
@@ -31,8 +46,11 @@ class Home extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if(prevProps.primaryColor != this.props.primaryColor) {
+        if(!this.props.loading && this.props.loading != prevProps.loading) {
+            // if(!this.props.profileImgUrl) this.props.updateUserData(this.props.id)
             document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
+            // console.log(detLum(this.props.primaryColor))
+            document.documentElement.style.setProperty('--light', detLum(this.props.primaryColor))
         }
     }
 

@@ -33,6 +33,7 @@ module.exports = {
                     primaryColor: updatedUser[0].primary_color,
                     profileImgUrl: updatedUser[0].profile_img_url
                 }
+                console.log(req.session.user)
 
                 res.status(200).json(req.session.user)
             })

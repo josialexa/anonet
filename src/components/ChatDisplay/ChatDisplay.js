@@ -37,10 +37,10 @@ class ChatDisplay extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if(this.props.primaryColor != prevProps.primaryColor && this.props.primaryColor) {
+        if(this.props.primaryColor != prevProps.primaryColor && this.props.primaryColor && !this.props.loading) {
             document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
-            console.log('lum', detLum(this.props.primaryColor))
-            document.documentElement.style.setProperty('--light', detLum(this.props.primaryColor))
+            // console.log('lum', detLum(this.props.primaryColor))
+            
         }
     }
 
@@ -111,6 +111,7 @@ const checkout = state => ({
     id: state.ur.id,
     primaryColor: state.ur.primaryColor,
     profileImgUrl: state.ur.profileImgUrl,
+    loading: state.ur.loading,
     messages: state.ir.messages,
     currentRoom: state.ir.currentRoom,
     io: state.ir.io

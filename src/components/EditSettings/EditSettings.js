@@ -5,7 +5,7 @@ import axios from 'axios'
 import {SketchPicker} from 'react-color'
 import reactCSS from 'reactcss'
 import Loading from '../Loading/Loading'
-import {updateSettings, deleteUser} from '../../redux/reducers/userReducer'
+import {updateUserData, updateSettings, deleteUser} from '../../redux/reducers/userReducer'
 import './EditSettings.css'
 
 class EditSettings extends Component {
@@ -30,7 +30,7 @@ class EditSettings extends Component {
         if(!this.props.id) {
             this.props.history.push('/login')
         } else {
-            if(this.props.primaryColor != prevProps.primaryColor) {
+            if(this.props.primaryColor != prevProps.primaryColor && !this.props.loading) {
                 document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
             }
         }
@@ -90,6 +90,7 @@ class EditSettings extends Component {
 
         console.log(settings)
         this.props.updateSettings(settings)
+        this.props.updateUserData(this.props.id)
         document.documentElement.style.setProperty('--primary-color', this.state.colorSelection)
         this.props.history.push('/')
     }
@@ -173,4 +174,4 @@ const checkout = state => ({
     loading: state.ur.loading
 })
 
-export default connect(checkout, {updateSettings, deleteUser})(withRouter(EditSettings))
+export default connect(checkout, {updateUserData, updateSettings, deleteUser})(withRouter(EditSettings))

@@ -116,6 +116,7 @@ export default function reducer(state = initialState, action) {
                 loading: true
             }
         case `${UPDATE_SETTINGS}_FULFILLED`:
+            console.log('updated settings', payload)
             return {
                 ...state,
                 primaryColor: payload.data.primary_color,
