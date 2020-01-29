@@ -54,5 +54,18 @@ module.exports = {
                 console.log('Delete user error:', err)
                 res.status(500).json({message: 'Could not delete account'})
             })
+    },
+    getModsBans: async (req, res) => {
+        const db = req.app.get('db')
+        let modsBans
+
+        try {
+            modsBans = db.user.getRoomsModsBans(req.query.id)
+        } catch(err) {
+            console.log('Get rooms/mods/bans', err)
+            res.status(500).json({message: 'Could not get rooms/mods/bans'})
+        }
+
+        res.status(200).json(modsBans)
     }
 }

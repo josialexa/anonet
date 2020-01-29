@@ -1,0 +1,8 @@
+.ban-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 40%;
+    width: 40%;
+}

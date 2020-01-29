@@ -24,6 +24,7 @@ class EditSettings extends Component {
             this.props.history.push('/login')
         }
         document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
+        
     }
 
     componentDidUpdate(prevProps) {

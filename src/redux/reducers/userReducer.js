@@ -19,6 +19,7 @@ const REGISTER_USER = 'REGISTER_USER'
 const LOGIN = 'LOGIN'
 const LOGOUT = 'LOGOUT'
 const DELETE_USER = 'DELETE_USER'
+const GET_USER_MODS_BANS = 'GET_USER_MODS_BANS'
 // const UPDATE_MESSAGE = 'UPDATE_MESSAGE'
 // const UPDATE_FILE = 'UPDATE_FILE'
 // const SET_IO = 'SET_IO'
@@ -68,6 +69,13 @@ export const deleteUser = id => {
     return {
         type: DELETE_USER,
         payload: axios.delete(`/api/users/${id}`)
+    }
+}
+
+export const getUserModsBans = user => {
+    return {
+        type: GET_USER_MODS_BANS,
+        payload: axios.get(`/api/users/modsBans?id=${user.id}`)
     }
 }
 

@@ -6,7 +6,7 @@ import RoomUsers from '../RoomUsers/RoomUsers'
 import RoomSidebar from '../RoomSidebar/RoomSidebar'
 import ChatDisplay from '../ChatDisplay/ChatDisplay'
 import {updateUserData, logout} from '../../redux/reducers/userReducer'
-import {ioDisconnect} from '../../redux/reducers/ioReducer'
+import {ioDisconnect, setUser} from '../../redux/reducers/ioReducer'
 import './Home.css'
 
 const detLum = color => {
@@ -51,6 +51,7 @@ class Home extends Component {
             document.documentElement.style.setProperty('--primary-color', this.props.primaryColor)
             // console.log(detLum(this.props.primaryColor))
             document.documentElement.style.setProperty('--light', detLum(this.props.primaryColor))
+            if(prevProps.user != this.props.user && !prevProps.user) this.props.setUser({id: this.props.id, username: this.props.username})
         }
     }
 
@@ -104,4 +105,4 @@ const checkout = state => ({
     io: state.ir.io
 })
 
-export default connect(checkout, {updateUserData, ioDisconnect, logout})(withRouter(Home))
+export default connect(checkout, {updateUserData, ioDisconnect, setUser, logout})(withRouter(Home))

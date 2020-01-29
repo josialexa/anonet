@@ -45,6 +45,7 @@ app.post('/auth/register', ac.register)
 app.get('/auth/logout', ac.logout)
 
 app.use(am.usersOnly)
+app.get('api/users/modsBans', uc.getModsBans)
 app.get('/api/users/:id', uc.read)
 app.put('/api/users/', am.selfOnly, uc.update)
 app.delete('/api/users/:id', am.selfOnly, uc.delete)
@@ -76,6 +77,7 @@ io.on('connect', socket => {
     socket.on('join-room', async (localTime, room, user) => {
         socket.user = user
         let banList = await app.get('db').ban.readRoom(room.id)
+        let modList = await app.get('db').moderator.readRoom(room.id)
         // console.log(banList)
         /*&& banList.findIndex(v => v.user_id == user.id) == -1*/
 
@@ -85,14 +87,17 @@ io.on('connect', socket => {
                 
                 // console.log(Object.keys(socket.rooms))
                 if(!roomUsers[room.name]) roomUsers[room.name] = []
+                user.socket = socket.id
+                if(modList.findIndex(v => v.user_id == user.id) != -1) room.isMod = true
+                else room.isMod = false
                 roomUsers[room.name].push(user)
                 // console.log(roomUsers)
                 // console.log(room)
-                socket.to(room.name).emit('join-room-response',{
+                io.to(room.name).emit('join-room-response',{
                     localTime: localTime,
                     room: room,
                     message: `${user.username} has entered the room!`,
-                    users: roomUsers[room.name].map(v => v.username)
+                    user
                 })
             })
         }
@@ -118,6 +123,55 @@ io.on('connect', socket => {
             roomUsers[room.name].splice(roomUsers[room.name].indexOf(socket.user), 1)
             io.to(room.name).emit('set-room-users', roomUsers[room.name])
         })
+    })
+
+    socket.on('add-mod-request', async (user, room) => {
+        let addMod
+        try {
+            addMod = await app.get('db').moderator.create(user.id, room.id)
+        } catch(err) {
+            console.log('Adding mod', err)
+            return
+        }
+
+        room.isMod = true
+        socket.to(user.socket).emit('add-mod-response', user, room)
+    })
+
+    socket.on('remove-mod-request', async (user, room) => {
+        let removeMod
+        try {
+            removeMod = await app.get('db').moderator.deleteUserRoom(user.id, room.id)
+        } catch(err) {
+            console.log('Removing mod', err)
+        }
+
+        room.isMod = false
+        socket.to(user.socket).emit('remove-mod-response', user, room)
+    })
+
+    socket.on('add-ban-request', async (user, room, ban) => {
+        let addBan
+        try {
+            addBan = await app.get('db').ban.create(user.id, room.id, ban.banEnd, ban.reason, ban.bannedBy)
+        } catch(err) {
+            console.log('Create ban', err)
+            return
+        }
+
+        socket.to(user.socket).emit('add-ban-response', user, room, ban)
+    })
+
+    socket.on('remove-ban-request', async (user, room, ban) => {
+        let removeBan
+        try {
+            removeBan = await app.get('db').ban.deleteUserRoom(user.id, room.id)
+        } catch(err) {
+            console.log('Remove ban', err)
+            return
+        }
+
+        socket.to(user.socket).emit('remove-ban-response', user, room, ban)
     })
 
     socket.on('disconnect', reason => {
